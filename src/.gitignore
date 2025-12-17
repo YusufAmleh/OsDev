@@ -1,0 +1,10 @@
+nano .gitignore
+```
+
+Add these lines:
+```
+*.exe
+*.obj
+*.o
+*.bin
+*.img
