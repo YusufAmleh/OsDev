@@ -1,3 +1,4 @@
+;protected mode transition
 bits 16
 
 section .entry
@@ -9,6 +10,9 @@ extern _init
 extern start
 global entry
 
+;saves boot parameters and disables interrupts
+;we disable interrupts since we're switiching to protected mode
+;in protected mode interrupts would cuase crashes since the mechansim to handle interrupts has changed
 entry:
     cli
 
@@ -17,16 +21,17 @@ entry:
     mov [g_BootPartitionOff], si
     mov [g_BootPartitionSeg], di
 
-    ; setup stack
+    ; sets up a new stack at a higher address
     mov ax, ds
     mov ss, ax
-    mov sp, 0xFFF0
+    mov sp, 0xFFF0 ;we use this address since we want more space, this is now just below 64K boundary
     mov bp, sp
 
     ; switch to protected mode
-    call EnableA20          ; 2 - Enable A20 gate
-    call LoadGDT            ; 3 - Load GDT
-
+    call EnableA20          ; 2 - Enable A20 gate - - old PCs this line was disabled for backward compatibility 
+    call LoadGDT            ; 3 - Load GDT (Global Descriptor Table)
+    ;in protected mode, segments are differnt, the GDT defines memory segments and their permissions
+    
     ; 4 - set protection enable flag in CR0
     mov eax, cr0
     or al, 1
